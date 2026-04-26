@@ -84,7 +84,28 @@ describe('ApiClient', () => {
     }
   })
 
-  it('should handle connect method with correct payload', async () => {
+  it('should handle getNonce method with correct payload', async () => {
+    mockGetSessionKey.mockReturnValue(null)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ nonce: 'server-generated-nonce' })
+    })
+
+    const result = await apiClient.getNonce('wallet-address')
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:3001/auth/nonce',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress: 'wallet-address' })
+      }
+    )
+
+    expect(result).toEqual({ nonce: 'server-generated-nonce' })
+  })
+
+  it('should handle connect method with correct payload including nonce', async () => {
     mockGetSessionKey.mockReturnValue(null) // No session key for connect
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -95,7 +116,7 @@ describe('ApiClient', () => {
       })
     })
 
-    const result = await apiClient.connect('wallet-address', 'signature')
+    const result = await apiClient.connect('wallet-address', 'signature', 'server-generated-nonce')
 
     expect(mockFetch).toHaveBeenCalledWith(
       'http://localhost:3001/auth/connect',
@@ -106,7 +127,8 @@ describe('ApiClient', () => {
         },
         body: JSON.stringify({
           walletAddress: 'wallet-address',
-          signature: 'signature'
+          signature: 'signature',
+          nonce: 'server-generated-nonce'
         })
       }
     )

@@ -46,7 +46,11 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async connect(walletAddress: string, signature: string): Promise<{
+  async getNonce(walletAddress: string): Promise<{ nonce: string }> {
+    return this.request('POST', '/auth/nonce', { walletAddress });
+  }
+
+  async connect(walletAddress: string, signature: string, nonce: string): Promise<{
     sessionToken: string;
     sessionKey: string;
     sessionWalletPublicKey: string;
@@ -54,6 +58,7 @@ class ApiClient {
     return this.request('POST', '/auth/connect', {
       walletAddress,
       signature,
+      nonce,
     });
   }
 

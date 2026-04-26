@@ -80,17 +80,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Wallet not connected')
       }
 
-      // Create challenge message for signature
-      const message = `Sign this message to authenticate with PhantomPay.\n\nWallet: ${publicKey.toString()}\nTimestamp: ${Date.now()}`
-      const messageBytes = new TextEncoder().encode(message)
+      // Fetch a server-side nonce to prevent replay attacks
+      const client = createApiClient(getSessionKey)
+      const { nonce } = await client.getNonce(publicKey.toString())
+
+      // Sign the nonce as the challenge message
+      const messageBytes = new TextEncoder().encode(nonce)
       
       // Request signature from wallet
       const signature = await signMessage(messageBytes)
       const signatureBase58 = Buffer.from(signature).toString('base64')
 
-      // Send to backend for session creation
-      const client = createApiClient(getSessionKey)
-      const response = await client.connect(publicKey.toString(), signatureBase58)
+      // Send to backend for session creation (nonce required by API)
+      const response = await client.connect(publicKey.toString(), signatureBase58, nonce)
 
       // Store session key encrypted in localStorage
       await storeSessionKey(response.sessionKey)
