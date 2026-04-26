@@ -50,7 +50,6 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
   })
   const [errors, setErrors] = useState<FieldErrors>({})
   const [submitting, setSubmitting] = useState(false)
-  const [createdLinkId, setCreatedLinkId] = useState<string | null>(null)
 
   const validate = (): boolean => {
     const e: FieldErrors = {}
@@ -77,8 +76,8 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
         usageType: values.usageType,
       })
       await qc.invalidateQueries({ queryKey: queryKeys.links() })
-      setCreatedLinkId(result.id)
       addToast('Payment link created', 'success')
+      onClose()
     } catch (err) {
       if (err instanceof ApiError && err.details) {
         const fieldErrs: FieldErrors = {}
@@ -92,22 +91,6 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
     } finally {
       setSubmitting(false)
     }
-  }
-
-  if (createdLinkId) {
-    const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/pay/${createdLinkId}`
-    return (
-      <div className="space-y-4">
-        <h3 className="text-white font-semibold">Link created!</h3>
-        <div className="flex items-center gap-2 bg-zinc-800 rounded-lg px-3 py-2">
-          <span className="text-zinc-300 text-sm font-mono flex-1 truncate">{url}</span>
-          <CopyButton value={url} label="Copy payment link" />
-        </div>
-        <button onClick={onClose} className="w-full py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white text-sm transition-colors">
-          Done
-        </button>
-      </div>
-    )
   }
 
   return (
@@ -185,10 +168,10 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
           {(['single-use', 'multiple-use'] as const).map(type => (
             <label
               key={type}
-              className={`flex flex-col gap-1 p-3 rounded-lg border cursor-pointer transition-colors ${
+              className={`flex items-center justify-center py-2 px-3 rounded-lg border cursor-pointer transition-colors text-sm font-medium ${
                 values.usageType === type
-                  ? 'border-violet-500 bg-violet-600/10'
-                  : 'border-zinc-700 hover:border-zinc-500'
+                  ? 'border-violet-500 bg-violet-600/20 text-white'
+                  : 'border-zinc-700 hover:border-zinc-500 text-zinc-400'
               }`}
             >
               <input
@@ -199,12 +182,7 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
                 onChange={() => setValues(v => ({ ...v, usageType: type }))}
                 className="sr-only"
               />
-              <span className="text-white text-sm font-medium capitalize">{type === 'single-use' ? 'Single Use' : 'Multiple Use'}</span>
-              <span className="text-zinc-400 text-xs">
-                {type === 'single-use'
-                  ? 'Link can only be paid once'
-                  : 'Link can be paid multiple times'}
-              </span>
+              {type === 'single-use' ? 'Single Use' : 'Multiple Use'}
             </label>
           ))}
         </div>
@@ -217,10 +195,10 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
           {(['anonymous', 'verifiable'] as const).map(mode => (
             <label
               key={mode}
-              className={`flex flex-col gap-1 p-3 rounded-lg border cursor-pointer transition-colors ${
+              className={`flex items-center justify-center py-2 px-3 rounded-lg border cursor-pointer transition-colors text-sm font-medium ${
                 values.privacyMode === mode
-                  ? 'border-violet-500 bg-violet-600/10'
-                  : 'border-zinc-700 hover:border-zinc-500'
+                  ? 'border-violet-500 bg-violet-600/20 text-white'
+                  : 'border-zinc-700 hover:border-zinc-500 text-zinc-400'
               }`}
             >
               <input
@@ -231,12 +209,7 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
                 onChange={() => setValues(v => ({ ...v, privacyMode: mode }))}
                 className="sr-only"
               />
-              <span className="text-white text-sm font-medium capitalize">{mode}</span>
-              <span className="text-zinc-400 text-xs">
-                {mode === 'anonymous'
-                  ? "Sender's identity fully hidden"
-                  : 'Sender can prove legitimacy without revealing identity'}
-              </span>
+              <span className="capitalize">{mode}</span>
             </label>
           ))}
         </div>
