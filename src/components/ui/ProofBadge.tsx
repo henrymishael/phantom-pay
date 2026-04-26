@@ -1,5 +1,5 @@
 interface ProofBadgeProps {
-  proofValid: boolean
+  proofValid?: boolean
 }
 
 export function ProofBadge({ proofValid }: ProofBadgeProps) {

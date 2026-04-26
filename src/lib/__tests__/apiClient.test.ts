@@ -21,7 +21,7 @@ describe('ApiClient', () => {
     mockGetSessionKey.mockReturnValue('test-session-key')
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ success: true })
+      json: () => Promise.resolve([])
     })
 
     await apiClient.getLinks()
@@ -43,7 +43,7 @@ describe('ApiClient', () => {
     mockGetSessionKey.mockReturnValue(null)
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ success: true })
+      json: () => Promise.resolve({ linkId: 'test-link-id' })
     })
 
     await apiClient.getPublicLink('test-link-id')
@@ -175,7 +175,7 @@ describe('ApiClient', () => {
     mockGetSessionKey.mockReturnValue('secret-session-key')
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({})
+      json: () => Promise.resolve({ linkId: 'new-link-id' })
     })
 
     await apiClient.createLink({

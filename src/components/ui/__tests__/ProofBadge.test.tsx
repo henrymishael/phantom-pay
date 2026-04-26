@@ -20,7 +20,7 @@ describe('ProofBadge', () => {
   })
 
   it('does not render when proofValid is undefined', () => {
-    render(<ProofBadge proofValid={undefined as any} />)
+    render(<ProofBadge proofValid={undefined} />)
     
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })

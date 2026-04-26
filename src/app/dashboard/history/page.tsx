@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, HistoryRecord } from "@/lib/apiClient";
 import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
 import { ErrorSection } from "@/components/ui/ErrorSection";
 import { PrivacyModeBadge } from "@/components/ui/PrivacyModeBadge";
@@ -17,8 +16,7 @@ export default function HistoryPage() {
     queryFn: () => apiClient.getHistory(page),
   });
 
-  const records =
-    data?.records || (Array.isArray(data) ? data : (data as any)?.data || []);
+  const records = data?.records || [];
   const total = data?.total || records.length || 0;
   const totalPages = Math.max(0, Math.ceil(total / 25));
 
@@ -58,7 +56,7 @@ export default function HistoryPage() {
                 </tr>
               </thead>
               <tbody>
-                {records.map((record: any) => (
+                {records.map((record: HistoryRecord) => (
                   <tr key={record.id} className="border-t border-zinc-700">
                     <td className="px-4 py-3 text-white text-sm">
                       {new Date(record.createdAt).toLocaleString("en-US", {
