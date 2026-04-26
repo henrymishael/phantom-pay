@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./providers";
+import { Providers } from "@/app/providers";
+import { Analytics } from "@vercel/analytics/react";
 
 const quicksand = Quicksand({
   variable: "--font-quicksand",
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col" style={{ fontFamily: 'var(--font-quicksand)' }}>
         <Providers>
           {children}
+          <Analytics />
         </Providers>
       </body>
     </html>

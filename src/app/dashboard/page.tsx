@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { queryKeys } from '../../src/lib/queryKeys'
-import { apiClient } from '../../src/lib/apiClient'
-import { CreateLinkModal } from '../../src/components/dashboard/CreateLinkModal'
-import { PaymentLinkCard } from '../../src/components/dashboard/PaymentLinkCard'
-import { SkeletonBlock } from '../../src/components/ui/SkeletonBlock'
-import { ErrorSection } from '../../src/components/ui/ErrorSection'
+import { queryKeys } from '@/lib/queryKeys'
+import { apiClient } from '@/lib/apiClient'
+import { CreateLinkModal } from '@/components/dashboard/CreateLinkModal'
+import { PaymentLinkCard } from '@/components/dashboard/PaymentLinkCard'
+import { SkeletonBlock } from '@/components/ui/SkeletonBlock'
+import { ErrorSection } from '@/components/ui/ErrorSection'
 
 export default function DashboardPage() {
   const qc = useQueryClient()

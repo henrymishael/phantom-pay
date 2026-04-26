@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { queryKeys } from '../../../src/lib/queryKeys'
-import { apiClient } from '../../../src/lib/apiClient'
-import { SkeletonBlock } from '../../../src/components/ui/SkeletonBlock'
-import { ErrorSection } from '../../../src/components/ui/ErrorSection'
-import { PrivacyModeBadge } from '../../../src/components/ui/PrivacyModeBadge'
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
+import { apiClient } from "@/lib/apiClient";
+import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
+import { ErrorSection } from "@/components/ui/ErrorSection";
+import { PrivacyModeBadge } from "@/components/ui/PrivacyModeBadge";
 
 export default function HistoryPage() {
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(1);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.history(page),
     queryFn: () => apiClient.getHistory(page),
-  })
+  });
 
-  const totalPages = data ? Math.ceil(data.total / 25) : 0
+  const totalPages = data ? Math.ceil(data.total / 25) : 0;
 
   return (
     <div className="space-y-6">
@@ -24,34 +24,47 @@ export default function HistoryPage() {
 
       {isLoading ? (
         <div className="space-y-2">
-          {[1, 2, 3, 4, 5].map(i => <SkeletonBlock key={i} height="60px" />)}
+          {[1, 2, 3, 4, 5].map((i) => (
+            <SkeletonBlock key={i} height="60px" />
+          ))}
         </div>
       ) : error ? (
-        <ErrorSection message="Failed to load transaction history" onRetry={refetch} />
+        <ErrorSection
+          message="Failed to load transaction history"
+          onRetry={refetch}
+        />
       ) : data && data.records.length > 0 ? (
         <>
           <div className="bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-zinc-900">
                 <tr>
-                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">Date</th>
-                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">Direction</th>
-                  <th className="text-right text-zinc-400 text-xs font-medium px-4 py-2">Amount</th>
-                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">Privacy</th>
+                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">
+                    Date
+                  </th>
+                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">
+                    Direction
+                  </th>
+                  <th className="text-right text-zinc-400 text-xs font-medium px-4 py-2">
+                    Amount
+                  </th>
+                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">
+                    Privacy
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {data.records.map(record => (
+                {data.records.map((record) => (
                   <tr key={record.id} className="border-t border-zinc-700">
                     <td className="px-4 py-3 text-white text-sm">
-                      {new Date(record.createdAt).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        timeZone: 'UTC',
-                        timeZoneName: 'short',
+                      {new Date(record.createdAt).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: "UTC",
+                        timeZoneName: "short",
                       })}
                     </td>
                     <td className="px-4 py-3">
@@ -75,7 +88,7 @@ export default function HistoryPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2">
               <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 className="px-3 py-1 text-sm text-white bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed rounded border border-zinc-700 transition-colors"
                 aria-label="Previous page"
@@ -86,7 +99,7 @@ export default function HistoryPage() {
                 Page {page} of {totalPages}
               </span>
               <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 className="px-3 py-1 text-sm text-white bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed rounded border border-zinc-700 transition-colors"
                 aria-label="Next page"
@@ -100,5 +113,5 @@ export default function HistoryPage() {
         <p className="text-zinc-500 text-sm">No transactions yet</p>
       )}
     </div>
-  )
+  );
 }
