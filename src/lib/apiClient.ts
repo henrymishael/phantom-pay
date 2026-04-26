@@ -166,7 +166,7 @@ class ApiClient {
   }
 
   async deactivateLink(linkId: string): Promise<void> {
-    return this.request("POST", `/payments/links/${linkId}/deactivate`);
+    return this.request("PATCH", `/payments/links/${linkId}/deactivate`);
   }
 
   // Payment submission
@@ -192,7 +192,10 @@ class ApiClient {
   }
 
   async getHistory(page: number): Promise<HistoryResponse> {
-    return this.request<HistoryResponse>("GET", `/payments/history?page=${page}`);
+    return this.request<HistoryResponse>(
+      "GET",
+      `/payments/history?page=${page}`,
+    );
   }
 }
 
