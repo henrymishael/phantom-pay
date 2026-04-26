@@ -28,7 +28,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { publicKey, signMessage, disconnect: walletDisconnect, connected } = useWallet()
-  const { getSessionKey, storeSessionKey, clearSessionKey, isPresent } = useSessionKey()
+  const { getSessionKey, storeSessionKey, clearSessionKey, isPresent, isReady } = useSessionKey()
   const { addToast } = useToast()
   const router = useRouter()
 
@@ -50,10 +50,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const hasWallet = connected && publicKey
 
       if (hasSession && hasWallet) {
-        setIsAuthenticated(true)
-        setWalletAddress(publicKey.toString())
-        // Set a placeholder timestamp - in real app this would come from session data
-        setSessionCreatedAt(new Date().toISOString())
+        if (isReady) {
+          setIsAuthenticated(true)
+          setWalletAddress(publicKey.toString())
+          // Set a placeholder timestamp - in real app this would come from session data
+          setSessionCreatedAt(new Date().toISOString())
+        }
       } else {
         setIsAuthenticated(false)
         setWalletAddress(null)
@@ -62,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     checkAuthStatus()
-  }, [connected, publicKey, isPresent])
+  }, [connected, publicKey, isPresent, isReady])
 
   // Listen for wallet disconnection events
   useEffect(() => {

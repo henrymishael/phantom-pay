@@ -1,5 +1,5 @@
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 interface EncryptedSessionKeyEntry {
   ciphertext: string;   // base64-encoded AES-256-GCM ciphertext
@@ -12,6 +12,7 @@ interface UseSessionKey {
   storeSessionKey(key: string): Promise<void>;   // encrypt and persist
   clearSessionKey(): void;              // delete from localStorage
   isPresent(): boolean;                 // check if encrypted key exists
+  isReady: boolean;                     // true when decryption is complete (or not needed)
 }
 
 const STORAGE_KEY = 'ppsk';
@@ -21,6 +22,7 @@ export function useSessionKey(): UseSessionKey {
   const { publicKey } = useWallet();
   const decryptedKeyRef = useRef<string | null>(null);
   const lastPublicKeyRef = useRef<string | null>(null);
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   const deriveKey = async (salt: Uint8Array): Promise<CryptoKey> => {
     if (!publicKey) {
@@ -102,32 +104,51 @@ export function useSessionKey(): UseSessionKey {
 
   // Auto-decrypt when wallet connects or changes
   useEffect(() => {
-    if (!publicKey) {
-      decryptedKeyRef.current = null;
-      lastPublicKeyRef.current = null;
-      return;
-    }
+    let isMounted = true;
 
-    const currentPublicKeyStr = publicKey.toString();
-    
-    // If wallet changed, clear cached key
-    if (lastPublicKeyRef.current !== currentPublicKeyStr) {
-      decryptedKeyRef.current = null;
-    }
+    const runDecryption = async () => {
+      if (!publicKey) {
+        decryptedKeyRef.current = null;
+        lastPublicKeyRef.current = null;
+        if (isMounted) setIsReady(true);
+        return;
+      }
 
-    // If we don't have a cached key and there's encrypted data, decrypt it
-    if (!decryptedKeyRef.current && typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEY)) {
-      decryptSessionKey().then(key => {
-        if (key) {
-          decryptedKeyRef.current = key;
-          lastPublicKeyRef.current = currentPublicKeyStr;
+      const currentPublicKeyStr = publicKey.toString();
+      
+      // If wallet changed, clear cached key
+      if (lastPublicKeyRef.current !== currentPublicKeyStr) {
+        decryptedKeyRef.current = null;
+      }
+
+      // If we don't have a cached key and there's encrypted data, decrypt it
+      if (!decryptedKeyRef.current && typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEY)) {
+        if (isMounted) setIsReady(false);
+        try {
+          const key = await decryptSessionKey();
+          if (key && isMounted) {
+            decryptedKeyRef.current = key;
+            lastPublicKeyRef.current = currentPublicKeyStr;
+          }
+        } catch (error) {
+          console.error('Auto-decryption failed:', error);
+        } finally {
+          if (isMounted) setIsReady(true);
         }
-      }).catch(error => {
-        console.error('Auto-decryption failed:', error);
-      });
-    }
+      } else {
+        if (isMounted) setIsReady(true);
+      }
 
-    lastPublicKeyRef.current = currentPublicKeyStr;
+      if (isMounted) {
+        lastPublicKeyRef.current = currentPublicKeyStr;
+      }
+    };
+
+    runDecryption();
+
+    return () => {
+      isMounted = false;
+    };
   }, [publicKey, decryptSessionKey]);
 
   const storeSessionKey = useCallback(async (sessionKey: string): Promise<void> => {
@@ -215,5 +236,6 @@ export function useSessionKey(): UseSessionKey {
     storeSessionKey,
     clearSessionKey,
     isPresent,
+    isReady,
   };
 }

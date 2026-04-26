@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import { AuthProvider, useAuth } from '../AuthContext'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useSessionKey } from '../../hooks/useSessionKey'
@@ -60,6 +61,7 @@ describe('AuthContext', () => {
       storeSessionKey: mockStoreSessionKey,
       clearSessionKey: mockClearSessionKey,
       isPresent: mockIsPresent,
+      isReady: true,
     })
   })
 
@@ -69,7 +71,7 @@ describe('AuthContext', () => {
       connected: false,
       signMessage: undefined,
       disconnect: vi.fn(),
-    } as any)
+    } as unknown as ReturnType<typeof useWallet>)
     
     mockIsPresent.mockReturnValue(false)
 
@@ -94,7 +96,7 @@ describe('AuthContext', () => {
       connected: true,
       signMessage: vi.fn(),
       disconnect: vi.fn(),
-    } as any)
+    } as unknown as ReturnType<typeof useWallet>)
     
     mockIsPresent.mockReturnValue(true)
 
@@ -119,7 +121,7 @@ describe('AuthContext', () => {
       connected: true,
       signMessage: vi.fn(),
       disconnect: vi.fn(),
-    } as any)
+    } as unknown as ReturnType<typeof useWallet>)
     
     mockIsPresent.mockReturnValue(true)
 
@@ -138,7 +140,7 @@ describe('AuthContext', () => {
       connected: false,
       signMessage: undefined,
       disconnect: vi.fn(),
-    } as any)
+    } as unknown as ReturnType<typeof useWallet>)
 
     rerender(
       <AuthProvider>
