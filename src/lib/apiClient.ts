@@ -160,14 +160,8 @@ class ApiClient {
   }
 }
 
-// Create singleton instance that will be configured with session key access
-let apiClientInstance: ApiClient | null = null;
-
 export function createApiClient(getSessionKey: () => string | null): ApiClient {
-  if (!apiClientInstance) {
-    apiClientInstance = new ApiClient({ getSessionKey });
-  }
-  return apiClientInstance;
+  return new ApiClient({ getSessionKey });
 }
 
 // Export for use in components (will be configured in AuthContext)
