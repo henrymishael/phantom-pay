@@ -111,7 +111,6 @@ describe('ApiClient', () => {
       ok: true,
       json: () => Promise.resolve({
         sessionToken: 'token',
-        sessionKey: 'key',
         sessionWalletPublicKey: 'pubkey'
       })
     })
@@ -135,7 +134,6 @@ describe('ApiClient', () => {
 
     expect(result).toEqual({
       sessionToken: 'token',
-      sessionKey: 'key',
       sessionWalletPublicKey: 'pubkey'
     })
   })

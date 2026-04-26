@@ -69,9 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!connected && isAuthenticated) {
       // Wallet was disconnected - clear session and reset state
       clearSessionKey()
-      setIsAuthenticated(false)
-      setWalletAddress(null)
-      setSessionCreatedAt(null)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('sessionWalletPublicKey')
+      }
     }
   }, [connected, isAuthenticated, clearSessionKey])
 
@@ -95,12 +95,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Send to backend for session creation (nonce required by API)
       const response = await client.connect(publicKey.toString(), signatureBase58, nonce)
 
-      // Store session key encrypted in localStorage
-      await storeSessionKey(response.sessionKey)
+      // Store session token encrypted in localStorage
+      await storeSessionKey(response.sessionToken)
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sessionWalletPublicKey', response.sessionWalletPublicKey)
+      }
 
       // Update auth state
       setIsAuthenticated(true)
-      setWalletAddress(publicKey.toString())
+      setWalletAddress(response.sessionWalletPublicKey || publicKey.toString())
       setSessionCreatedAt(new Date().toISOString())
 
       addToast('Successfully connected to PhantomPay', 'success')
@@ -131,6 +135,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Clear session key from localStorage
     clearSessionKey()
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('sessionWalletPublicKey')
+    }
 
     // Disconnect wallet
     try {

@@ -52,7 +52,6 @@ class ApiClient {
 
   async connect(walletAddress: string, signature: string, nonce: string): Promise<{
     sessionToken: string;
-    sessionKey: string;
     sessionWalletPublicKey: string;
   }> {
     return this.request('POST', '/auth/connect', {
