@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/navigation'
+import bs58 from 'bs58'
 import { useSessionKey } from '../hooks/useSessionKey'
 import { createApiClient, setApiClient, ApiError } from '../lib/apiClient'
 import { useToast } from './ToastContext'
@@ -89,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Request signature from wallet
       const signature = await signMessage(messageBytes)
-      const signatureBase58 = Buffer.from(signature).toString('base64')
+      const signatureBase58 = bs58.encode(signature)
 
       // Send to backend for session creation (nonce required by API)
       const response = await client.connect(publicKey.toString(), signatureBase58, nonce)
