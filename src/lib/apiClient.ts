@@ -46,6 +46,9 @@ class ApiClient {
   }
 
   // Auth endpoints
+  async getNonce(walletAddress: string): Promise<{ nonce: string }> {
+    return this.request('POST', '/auth/challenge', { walletAddress });
+  }
 
   async connect(walletAddress: string, signature: string, nonce: string): Promise<{
     sessionToken: string;

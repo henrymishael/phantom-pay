@@ -80,10 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Wallet not connected')
       }
 
+      // Fetch a server-side nonce to prevent replay attacks
       const client = createApiClient(getSessionKey)
-      
-      // Generate a client-side nonce since the backend doesn't provide one
-      const nonce = crypto.randomUUID()
+      const { nonce } = await client.getNonce(publicKey.toString())
 
       // Sign the nonce as the challenge message
       const messageBytes = new TextEncoder().encode(nonce)

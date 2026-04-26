@@ -94,7 +94,7 @@ describe('ApiClient', () => {
     const result = await apiClient.getNonce('wallet-address')
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/auth/nonce',
+      'http://localhost:3001/auth/challenge',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
