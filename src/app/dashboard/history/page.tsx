@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -16,7 +17,10 @@ export default function HistoryPage() {
     queryFn: () => apiClient.getHistory(page),
   });
 
-  const totalPages = data ? Math.ceil(data.total / 25) : 0;
+  const records =
+    data?.records || (Array.isArray(data) ? data : (data as any)?.data || []);
+  const total = data?.total || records.length || 0;
+  const totalPages = Math.max(0, Math.ceil(total / 25));
 
   return (
     <div className="space-y-6">
@@ -33,7 +37,7 @@ export default function HistoryPage() {
           message="Failed to load transaction history"
           onRetry={refetch}
         />
-      ) : data && data.records.length > 0 ? (
+      ) : records.length > 0 ? (
         <>
           <div className="bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden">
             <table className="w-full">
@@ -54,7 +58,7 @@ export default function HistoryPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.records.map((record) => (
+                {records.map((record: any) => (
                   <tr key={record.id} className="border-t border-zinc-700">
                     <td className="px-4 py-3 text-white text-sm">
                       {new Date(record.createdAt).toLocaleString("en-US", {

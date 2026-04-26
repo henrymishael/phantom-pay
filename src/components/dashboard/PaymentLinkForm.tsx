@@ -13,6 +13,7 @@ interface FormValues {
   description: string
   expiresAt: string
   privacyMode: 'anonymous' | 'verifiable'
+  usageType: 'single-use' | 'multiple-use'
 }
 
 interface FieldErrors {
@@ -45,6 +46,7 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
     description: '',
     expiresAt: '',
     privacyMode: getDefaultPrivacyMode(),
+    usageType: 'single-use',
   })
   const [errors, setErrors] = useState<FieldErrors>({})
   const [submitting, setSubmitting] = useState(false)
@@ -70,8 +72,9 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
         amount: parseFloat(values.amount),
         token: values.token,
         description: values.description || undefined,
-        expiresAt: values.expiresAt || undefined,
+        expiresAt: values.expiresAt ? new Date(values.expiresAt).toISOString() : undefined,
         privacyMode: values.privacyMode,
+        usageType: values.usageType,
       })
       await qc.invalidateQueries({ queryKey: queryKeys.links() })
       setCreatedLinkId(result.id)
@@ -173,6 +176,38 @@ export function PaymentLinkForm({ onClose }: PaymentLinkFormProps) {
           aria-label="Link expiry date and time"
           className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500"
         />
+      </div>
+
+      {/* Usage Type */}
+      <div>
+        <span className="block text-sm text-zinc-300 mb-2">Usage Type <span className="text-red-400">*</span></span>
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Usage type">
+          {(['single-use', 'multiple-use'] as const).map(type => (
+            <label
+              key={type}
+              className={`flex flex-col gap-1 p-3 rounded-lg border cursor-pointer transition-colors ${
+                values.usageType === type
+                  ? 'border-violet-500 bg-violet-600/10'
+                  : 'border-zinc-700 hover:border-zinc-500'
+              }`}
+            >
+              <input
+                type="radio"
+                name="usageType"
+                value={type}
+                checked={values.usageType === type}
+                onChange={() => setValues(v => ({ ...v, usageType: type }))}
+                className="sr-only"
+              />
+              <span className="text-white text-sm font-medium capitalize">{type === 'single-use' ? 'Single Use' : 'Multiple Use'}</span>
+              <span className="text-zinc-400 text-xs">
+                {type === 'single-use'
+                  ? 'Link can only be paid once'
+                  : 'Link can be paid multiple times'}
+              </span>
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* Privacy Mode */}

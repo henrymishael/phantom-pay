@@ -72,6 +72,7 @@ class ApiClient {
     description?: string;
     expiresAt?: string;
     privacyMode: 'anonymous' | 'verifiable';
+    usageType: 'single-use' | 'multiple-use';
   }): Promise<{
     id: string;
     amount: number;
