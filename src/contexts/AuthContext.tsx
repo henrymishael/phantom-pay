@@ -82,10 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Fetch a server-side nonce to prevent replay attacks
       const client = createApiClient(getSessionKey)
-      const { nonce } = await client.getNonce(publicKey.toString())
+      const { nonce, message } = await client.getNonce(publicKey.toString())
 
-      // Sign the nonce as the challenge message
-      const messageBytes = new TextEncoder().encode(nonce)
+      // Sign the formatted message (which contains the nonce)
+      const messageBytes = new TextEncoder().encode(message)
       
       // Request signature from wallet
       const signature = await signMessage(messageBytes)

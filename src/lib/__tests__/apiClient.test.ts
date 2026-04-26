@@ -88,7 +88,7 @@ describe('ApiClient', () => {
     mockGetSessionKey.mockReturnValue(null)
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ nonce: 'server-generated-nonce' })
+      json: () => Promise.resolve({ nonce: 'server-generated-nonce', message: 'test-message' })
     })
 
     const result = await apiClient.getNonce('wallet-address')
@@ -102,7 +102,7 @@ describe('ApiClient', () => {
       }
     )
 
-    expect(result).toEqual({ nonce: 'server-generated-nonce' })
+    expect(result).toEqual({ nonce: 'server-generated-nonce', message: 'test-message' })
   })
 
   it('should handle connect method with correct payload including nonce', async () => {
