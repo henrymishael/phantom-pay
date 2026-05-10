@@ -1,53 +1,53 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { PaymentLinkForm } from './PaymentLinkForm'
+import { useEffect } from "react";
+import { PaymentLinkForm } from "./PaymentLinkForm";
+import { X } from "lucide-react";
+import { Button } from "../ui/Button";
 
 interface CreateLinkModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function CreateLinkModal({ isOpen, onClose }: CreateLinkModalProps) {
   // Prevent body scroll when open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = '' }
-  }, [isOpen])
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center p-0 sm:p-4 bg-black/70"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
-      {/* Bottom drawer on mobile, centered modal on sm+ */}
       <div
-        className={[
-          'w-full bg-zinc-900 border-t border-zinc-800 rounded-t-2xl p-6 shadow-2xl',
-          'sm:max-w-md sm:border sm:border-zinc-800 sm:rounded-xl sm:rounded-t-xl',
-          'animate-slide-up sm:animate-none',
-        ].join(' ')}
-        onClick={e => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-card border border-border shadow-2xl rounded-t-xl sm:rounded-xl p-6 sm:p-8 animate-in slide-in-from-bottom-4 duration-300"
+        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        {/* Drag handle — visible only on mobile */}
-        <div className="flex justify-center mb-4 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-zinc-700" />
+        <div className="flex items-center justify-between mb-6">
+          <h2 id="modal-title" className="text-2xl font-bold tracking-tight">
+            Create Payment Link
+          </h2>
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
+            <X className="w-5 h-5" />
+          </Button>
         </div>
-
-        <h2 id="modal-title" className="text-xl font-semibold text-white mb-4">
-          Create Payment Link
-        </h2>
+        
         <PaymentLinkForm onClose={onClose} />
       </div>
     </div>
-  )
+  );
 }

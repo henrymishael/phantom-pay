@@ -7,6 +7,17 @@ import { apiClient, HistoryRecord } from "@/lib/apiClient";
 import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
 import { ErrorSection } from "@/components/ui/ErrorSection";
 import { PrivacyModeBadge } from "@/components/ui/PrivacyModeBadge";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/Table";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { ChevronLeft, ChevronRight, History } from "lucide-react";
 
 export default function HistoryPage() {
   const [page, setPage] = useState(1);
@@ -21,8 +32,11 @@ export default function HistoryPage() {
   const totalPages = Math.max(0, Math.ceil(total / 25));
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Transaction History</h1>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Transaction History</h1>
+        <p className="text-muted-foreground">View and manage your past payment activity.</p>
+      </div>
 
       {isLoading ? (
         <div className="space-y-2">
@@ -36,83 +50,81 @@ export default function HistoryPage() {
           onRetry={refetch}
         />
       ) : records.length > 0 ? (
-        <>
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-zinc-900">
-                <tr>
-                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">
-                    Date
-                  </th>
-                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">
-                    Direction
-                  </th>
-                  <th className="text-right text-zinc-400 text-xs font-medium px-4 py-2">
-                    Amount
-                  </th>
-                  <th className="text-left text-zinc-400 text-xs font-medium px-4 py-2">
-                    Privacy
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Direction</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Privacy</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {records.map((record: HistoryRecord) => (
-                  <tr key={record.id} className="border-t border-zinc-700">
-                    <td className="px-4 py-3 text-white text-sm">
+                  <TableRow key={record.id}>
+                    <TableCell className="text-sm">
                       {new Date(record.createdAt).toLocaleString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
-                        timeZone: "UTC",
-                        timeZoneName: "short",
                       })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-900/30 text-green-400">
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="capitalize">
                         {record.direction}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-white text-sm font-medium">
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
                       {record.amount} {record.token}
-                    </td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell>
                       <PrivacyModeBadge mode={record.privacyMode} />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1 text-sm text-white bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed rounded border border-zinc-700 transition-colors"
-                aria-label="Previous page"
-              >
-                Previous
-              </button>
-              <span className="text-zinc-400 text-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-1 text-sm text-white bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed rounded border border-zinc-700 transition-colors"
-                aria-label="Next page"
-              >
-                Next
-              </button>
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
-        </>
+        </div>
       ) : (
-        <p className="text-zinc-500 text-sm">No transactions yet</p>
+        <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border rounded-xl">
+          <History className="w-12 h-12 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-medium">No transactions yet</h3>
+          <p className="text-muted-foreground">When you send or receive payments, they will appear here.</p>
+        </div>
       )}
     </div>
   );

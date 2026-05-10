@@ -21,6 +21,7 @@ export interface PaymentLink {
   expiresAt: string | null;
   privacyMode: "anonymous" | "verifiable";
   status: "active" | "expired" | "fulfilled" | "deactivated";
+  usageType: "single-use" | "multi-use";
   createdAt: string;
 }
 
@@ -130,7 +131,7 @@ class ApiClient {
     description?: string;
     expiresAt?: string;
     privacyMode: "anonymous" | "verifiable";
-    usageType: "single-use" | "multiple-use";
+    usageType: "single-use" | "multi-use";
   }): Promise<PaymentLink> {
     const res = await this.request<PaymentLinkResponse>(
       "POST",
@@ -174,6 +175,7 @@ class ApiClient {
     linkId: string,
     body: {
       senderProof?: string;
+      payerWallet?: string;
     },
   ): Promise<{
     txHash: string;

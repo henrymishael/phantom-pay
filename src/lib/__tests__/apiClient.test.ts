@@ -149,7 +149,8 @@ describe('ApiClient', () => {
     })
 
     const result = await apiClient.submitPayment('link-id', {
-      senderProof: 'proof123'
+      senderProof: 'proof123',
+      payerWallet: 'wallet123'
     })
 
     expect(mockFetch).toHaveBeenCalledWith(
@@ -160,7 +161,8 @@ describe('ApiClient', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          senderProof: 'proof123'
+          senderProof: 'proof123',
+          payerWallet: 'wallet123'
         })
       }
     )
@@ -181,7 +183,8 @@ describe('ApiClient', () => {
     await apiClient.createLink({
       amount: 100,
       token: 'SOL',
-      privacyMode: 'anonymous'
+      privacyMode: 'anonymous',
+      usageType: 'single-use'
     })
 
     const [url, options] = mockFetch.mock.calls[0]

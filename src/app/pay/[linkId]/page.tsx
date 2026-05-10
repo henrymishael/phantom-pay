@@ -10,13 +10,13 @@ import { apiClient } from "@/lib/apiClient";
 import { SkeletonBlock } from "@/components/ui/SkeletonBlock";
 import { ProofBadge } from "@/components/ui/ProofBadge";
 import { PrivacyModeBadge } from "@/components/ui/PrivacyModeBadge";
+import bs58 from "bs58";
 
 export default function PaymentPage() {
   const params = useParams();
   const linkId = params.linkId as string;
   const { publicKey, signMessage, connected } = useWallet();
   const { setVisible } = useWalletModal();
-  const [selectedToken, setSelectedToken] = useState<"SOL" | "USDC">("SOL");
   const [proofSignature, setProofSignature] = useState<string | null>(null);
 
   // Fetch payment link details (unauthenticated)
@@ -29,34 +29,60 @@ export default function PaymentPage() {
     queryFn: () => apiClient.getPublicLink(linkId),
     retry: 1,
   });
+  
 
   // Payment submission mutation
   const paymentMutation = useMutation({
-    mutationFn: (body: { senderProof?: string }) =>
+    mutationFn: (body: { senderProof?: string; payerWallet?: string }) =>
       apiClient.submitPayment(linkId, body),
   });
 
-  const handleGenerateProof = async () => {
+  const generateProof = async (): Promise<string | null> => {
     if (!publicKey || !signMessage) {
       setVisible(true);
-      return;
+      return null;
     }
 
     try {
       const message = `PhantomPay proof for payment link ${linkId}\nWallet: ${publicKey.toString()}\nTimestamp: ${Date.now()}`;
       const messageBytes = new TextEncoder().encode(message);
       const signature = await signMessage(messageBytes);
-      const signatureBase58 = Buffer.from(signature).toString("base64");
-      setProofSignature(signatureBase58);
+      const proof = bs58.encode(signature);
+      setProofSignature(proof);
+      return proof;
     } catch (error) {
       console.error("Failed to generate proof:", error);
+      return null;
     }
   };
 
-  const handleSubmitPayment = () => {
-    const body = proofSignature ? { senderProof: proofSignature } : {};
-    paymentMutation.mutate(body);
+  const handleGenerateProof = async () => {
+    await generateProof();
   };
+
+  const handleSubmitPayment = async () => {
+    if (!link) return;
+
+    let currentProof = proofSignature;
+
+    // Generate proof if wallet is connected and no proof yet exists
+    if (!currentProof && publicKey && signMessage) {
+      currentProof = await generateProof();
+      // Don't abort on failure — proof is optional, continue without it
+    } else if (!currentProof && !publicKey) {
+      // No wallet connected — prompt only for verifiable links
+      if (link.privacyMode === "verifiable") {
+        setVisible(true);
+        return;
+      }
+    }
+
+    paymentMutation.mutate({
+      senderProof: currentProof || undefined,
+      payerWallet: publicKey?.toString() || undefined,
+    });
+  };
+
 
   // Loading state
   if (isLoading) {
@@ -200,26 +226,6 @@ export default function PaymentPage() {
           </div>
         </div>
 
-        {/* Token Selector */}
-        <div>
-          <label className="block text-zinc-300 text-sm mb-2">Pay with</label>
-          <div className="grid grid-cols-2 gap-2">
-            {(["SOL", "USDC"] as const).map((token) => (
-              <button
-                key={token}
-                onClick={() => setSelectedToken(token)}
-                className={`py-3 px-4 rounded-lg border transition-colors ${
-                  selectedToken === token
-                    ? "border-violet-500 bg-violet-600/10 text-white"
-                    : "border-zinc-700 text-zinc-400 hover:border-zinc-500"
-                }`}
-                aria-label={`Pay with ${token}`}
-              >
-                {token}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Verifiable Mode - Optional Proof */}
         {link.privacyMode === "verifiable" && (

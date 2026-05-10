@@ -16,6 +16,7 @@ import { clusterApiUrl } from "@solana/web3.js";
 import { queryClient } from "@/lib/queryClient";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 // Import wallet adapter CSS
 import "@solana/wallet-adapter-react-ui/styles.css";
@@ -38,7 +39,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <WalletModalProvider>
           <QueryClientProvider client={queryClient}>
             <ToastProvider>
-              <AuthProvider>{children}</AuthProvider>
+              <AuthProvider>
+                <NuqsAdapter>{children}</NuqsAdapter>
+              </AuthProvider>
             </ToastProvider>
           </QueryClientProvider>
         </WalletModalProvider>

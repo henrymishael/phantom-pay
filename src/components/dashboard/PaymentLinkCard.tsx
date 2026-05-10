@@ -1,61 +1,80 @@
-'use client'
+"use client";
 
-import { CopyButton } from '../ui/CopyButton'
-import { PrivacyModeBadge } from '../ui/PrivacyModeBadge'
+import { CopyButton } from "../ui/CopyButton";
+import { PrivacyModeBadge } from "../ui/PrivacyModeBadge";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { Badge } from "../ui/Badge";
+import { ExternalLink, MoreVertical, Copy, Trash2, Eye } from "lucide-react";
+import Link from "next/link";
+import { useToast } from "@/contexts/ToastContext";
 
-interface PaymentLink {
-  id: string
-  amount: number
-  token: 'SOL' | 'USDC'
-  description: string | null
-  expiresAt: string | null
-  privacyMode: 'anonymous' | 'verifiable'
-  status: 'active' | 'expired' | 'fulfilled' | 'deactivated'
-  createdAt: string
-}
+import { PaymentLink } from "@/lib/apiClient";
 
 interface PaymentLinkCardProps {
-  link: PaymentLink
-  onDeactivate: (id: string) => void
+  link: PaymentLink;
+  onDeactivate: (id: string) => void;
 }
 
 export function PaymentLinkCard({ link, onDeactivate }: PaymentLinkCardProps) {
-  const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/pay/${link.id}`
+  const { addToast } = useToast();
+  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/pay/${link.id}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url);
+    addToast("Link copied to clipboard", "success");
+  };
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold">
-            {link.amount} {link.token}
-          </p>
+    <Card className="group hover:border-primary/30 transition-all duration-300">
+      <CardHeader className="p-4 flex flex-row items-start justify-between space-y-0">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold">
+              {link.amount} {link.token}
+            </span>
+            <Badge variant={link.status === "active" ? "default" : "secondary"}>
+              {link.status}
+            </Badge>
+          </div>
           {link.description && (
-            <p className="text-zinc-400 text-sm truncate">{link.description}</p>
+            <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+              {link.description}
+            </p>
           )}
         </div>
         <PrivacyModeBadge mode={link.privacyMode} />
-      </div>
-
-      {link.expiresAt && (
-        <p className="text-zinc-500 text-xs">
-          Expires: {new Date(link.expiresAt).toLocaleString()}
-        </p>
-      )}
-
-      <div className="flex items-center gap-2">
-        <div className="flex-1 bg-zinc-900 rounded px-2 py-1 min-w-0">
-          <p className="text-zinc-400 text-xs font-mono truncate">{url}</p>
+      </CardHeader>
+      
+      <CardContent className="p-4 pt-0">
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 border border-border group-hover:bg-muted transition-colors">
+          <span className="text-[10px] font-mono text-muted-foreground truncate flex-1">
+            {url}
+          </span>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy}>
+            <Copy className="h-3 w-3" />
+          </Button>
         </div>
-        <CopyButton value={url} label="Copy link" />
-      </div>
+      </CardContent>
 
-      <button
-        onClick={() => onDeactivate(link.id)}
-        className="w-full py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-800 hover:border-red-700 rounded transition-colors"
-        aria-label={`Deactivate payment link ${link.id}`}
-      >
-        Deactivate
-      </button>
-    </div>
-  )
+      <CardFooter className="p-4 pt-0 flex gap-2">
+        <Button variant="outline" size="sm" className="flex-1" asChild>
+          <Link href={`/dashboard/links/${link.id}`}>
+            <Eye className="w-3 h-3 mr-2" />
+            View
+          </Link>
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => onDeactivate(link.id)}
+          disabled={link.status !== "active"}
+        >
+          <Trash2 className="w-3 h-3 mr-2" />
+          Deactivate
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 }
